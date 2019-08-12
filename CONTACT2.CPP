@@ -1,0 +1,285 @@
+#include<iostream.h>
+#include<stdlib.h>
+#include<dos.h>
+#include<conio.h>
+#include<stdio.h>
+#include<math.h>
+#include<string.h>
+#include<iomanip.h>
+#include<graphics.h>
+#include<fstream.h>
+void erase()
+{int x;
+ setcolor(0);
+ for(x=0;x<=639;x++)
+  {line(x,0,x,479);
+   delay(2);
+  }         //erasing function
+}
+
+
+class contact
+{
+  private:
+  char name[30],email[50],number[11];
+  public:
+  contact()
+  {
+	strcpy(name,"no name");
+	strcpy(email,"no email");
+	strcpy(number,"NA");
+  }
+  void getdata();
+  void showdata();
+  int storedata();
+  void readdata();
+  void search(char *);
+  void updatedata(char *);
+  void deletedata(char *);
+  void deletefile();
+};
+void contact::deletefile(){
+	remove("cont5.dat");
+}
+void contact::getdata()
+{
+	setcolor(5);
+	settextstyle(1,0,1);
+	outtextxy(50,50,"Enter the name of the person..\n");
+	gotoxy(8,6);
+	cin.ignore();
+	cin.getline(name,29);
+	setcolor(5);
+	settextstyle(1,0,1);
+	outtextxy(50,95,"Enter the email id of the person..");
+	gotoxy(8,9);
+	cin.getline(email,49);
+	setcolor(5);
+	settextstyle(1,0,1);
+	outtextxy(50,150,"Enter the mobile number of the person..");
+	gotoxy(8,12);
+	cin.getline(number,11);
+}
+void contact::showdata()
+{
+	cout<<setw(10)<<name<<setw(20)<<number<<setw(30)<<email<<"\n";
+}
+int contact::storedata()
+{
+	if(!strcmp(number,"0"))
+	{
+		cout<<"DATA not initialized\n";
+		return 0;
+	}
+	else
+	{
+		ofstream fout;
+		fout.open("cont5.dat",ios::app|ios::binary);
+		fout.write((char*)this,sizeof(*this));
+		fout.close();
+		return 1;
+	}
+}
+void contact::readdata()
+{
+	ifstream fin;
+	fin.open("cont5.dat",ios::in|ios::binary);
+	if(!fin)
+		cout<<"FILE is NOT created\n";
+	else{
+		fin.read((char*)this,sizeof(*this));
+		while(!fin.eof())
+		{
+			showdata();
+			fin.read((char*)this,sizeof(*this));
+		}
+		fin.close();
+	}
+}
+void contact::search(char *t)
+{
+	int flag=0;
+	ifstream fin;
+	fin.open("cont5.dat",ios::in|ios::binary);
+	fin.read((char*)this,sizeof(*this));
+	while(!fin.eof())
+	{
+		if(!strcmp(t,name)) {
+			showdata();
+			flag=1;
+		}
+		fin.read((char*)this,sizeof(*this));
+	}
+	if(flag==0)
+		cout<<"NO NUMBER REGISTERED FROM THIS NAME\n";
+
+	fin.close();
+}
+void contact::updatedata(char *r)
+{
+	fstream file;
+	int flag=0;
+	file.open("cont5.dat",ios::in|ios::out|ios::ate|ios::binary);
+	file.seekg(0);
+	file.read((char*)this,sizeof(*this));
+	while(!file.eof())
+	{
+		if(!strcmp(r,name))
+		{
+			flag=1;
+			getdata();
+			file.seekp(file.tellp()-sizeof(*this));
+			file.write((char*)this,sizeof(*this));
+		}
+		file.read((char*)this,sizeof(*this));
+	}
+	if(flag==1)
+		cout<<"Contact updated......\n";
+	else
+		cout<<"No contact with the entered name is present\n";
+	file.close();
+}
+void contact::deletedata(char *c){
+	ifstream file1;
+	ofstream file2;
+	file1.open("cont5.dat",ios::in|ios::binary);
+	int flag=0;
+	if(!file1)
+		cout<<"\nFILE NOT FOUND\n";
+	else{
+	file2.open("temp.dat",ios::out|ios::binary);
+	file1.read((char*)this,sizeof(*this));
+	while(!file1.eof())
+	{
+		if(strcmp(c,name))
+			file2.write((char*)this,sizeof(*this));
+		else
+			flag=1;
+		file1.read((char*)this,sizeof(*this));
+	}
+	file1.close();
+	file2.close();
+	remove("cont5.dat");
+	rename("temp.dat","cont5.dat");
+	if(flag==1)
+		cout<<"Contact Deleted...\n ";
+	else
+		cout<<"NO contact with the entered name is present\n";
+	}
+}
+void graphics()
+{
+	int x=60,y=100,c=35;
+	setcolor(13);
+	 settextstyle(1,0,1);
+	 outtextxy(60,y,"WELCOME TO YOUR PHONEBOOK..--\n\n");
+	outtextxy(x,y+1*c,"OPTIONS:--");
+	outtextxy(x,y+2*c,"1.Enter 'I' if you want to insert a contact.\n");
+	outtextxy(x,y+3*c,"2.Enter 'U' if you want to Update a Record.\n");
+	outtextxy(x,y+4*c,"3.Enter 'd' if you want to see all of your contact.\n");
+	outtextxy(x,y+5*c,"4.Enter 'S' if you want to search a particular contact.\n");
+	outtextxy(x,y+6*c,"5.Enter 'D' if you want to delete a particular contact\n");
+	outtextxy(x,y+7*c,"6.Enter 'E' if you want to delete whole contact\n");
+	outtextxy(x,y+8*c,"7.Enter 'Q' if you want to exit.\n");
+	int r=10;
+	while(!kbhit())
+	{
+		setcolor(13);
+		settextstyle(1,0,1);
+		outtextxy(r,27,"HELLO!!...SHUBHAM");
+		delay(1);
+		setcolor(0);
+		settextstyle(1,0,1);
+		outtextxy(r,27,"HELLO!!...SHUBHAM");
+		r++;
+		if(r>200)
+			r=0;
+	}
+}
+
+char userdriven()
+{
+  char choice;
+  graphics();
+  gotoxy(12,15);
+  cin>>choice;
+  return choice;
+}
+void main()
+{
+	int gdriver=DETECT,gmode;
+	initgraph(&gdriver,&gmode,"C:\\TurboC3\\BGI");
+	contact b1;
+	char titl[20];
+	while(1)
+	{      erase();
+		switch(userdriven())
+		{
+			case 'I':
+				erase();
+				b1.getdata();
+				b1.storedata();
+				cout<<"CONTACT Inserted....Press any key to continue\n";
+				break;
+			case 'U':
+				erase();
+				cout<<"ENter the name of the person for which you want to update the data\n";
+				cin.ignore();
+				cin.getline(titl,19);
+				b1.updatedata(titl);
+				break;
+
+			case 'd':
+				erase();
+				cout<<setw(10)<<"NAME"<<setw(20)<<"MOBILE NO."<<setw(30)<<"EMAIL"<<setw(2)<<"\n";
+				b1.readdata();
+				cout<<"Press any key to continue\n";
+				break;
+			case 'D':
+					erase();
+					cin.ignore();
+					cout<<"Enter the name of the contact which you want to delete\n";
+					cin.getline(titl,19);
+					b1.deletedata(titl);
+					cout<<"Enter any key to continue\n";
+					break;
+			case 'S':
+				erase();
+				cout<<"Enter the name of the person you want to search\n";
+				cin.ignore();
+				cin.getline(titl,19);
+				b1.search(titl);
+				cout<<"Press any key to continue\n";
+				break;
+			case 'Q':
+				erase();
+				cout<<"Are you Sure Want To  Exit(y/n)...\n";
+				char ch;
+				cin>>ch;
+				if(ch=='y')
+				{       erase();
+				//	gotoxy(12,13);
+					cout<<"Thank you for using this application\n";
+					cout<<"PRESS ANY KEY TO EXIT..\n";
+				       getch();
+					exit(0);
+				}
+				break;
+		case 'E':
+				erase();
+				b1.deletefile();
+				cout<<"file deleted\n";
+				cout<<"ENter any key to continue\n";
+				break;
+			default:
+				erase();
+			       getch();
+			//	gotoxy(12,12);
+				cout<<"Invalid choice.......Please try again\n";
+				break;
+		}
+		getch();
+	}
+}
+
+
